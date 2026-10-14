@@ -6,13 +6,11 @@ import DraggableTask from "./DraggableTask";
 const columnStyles = {
   todo: {
     dot: "bg-slate-400",
-    badge:
-      "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    badge: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
   },
   "in-progress": {
     dot: "bg-blue-500",
-    badge:
-      "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
+    badge: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
   },
   review: {
     dot: "bg-orange-500",
@@ -31,14 +29,17 @@ const KanbanColumn = ({ column, tasks = [] }) => {
     id: column.id,
   });
 
-  const styles = columnStyles[column.id] || columnStyles.todo;
+  const styles = columnStyles[column.id] ?? columnStyles.todo;
 
   return (
     <section className="flex min-w-0 flex-col">
       {/* Column Header */}
       <div className="mb-3 flex min-w-0 items-center justify-between gap-2 px-0.5">
         <div className="flex min-w-0 items-center gap-2">
-          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${styles.dot}`} />
+          <span
+            className={`h-2.5 w-2.5 shrink-0 rounded-full ${styles.dot}`}
+            aria-hidden="true"
+          />
 
           <h2 className="truncate text-sm font-bold text-slate-800 dark:text-slate-200">
             {column.title}
@@ -46,6 +47,7 @@ const KanbanColumn = ({ column, tasks = [] }) => {
 
           <span
             className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ${styles.badge}`}
+            aria-label={`${tasks.length} tasks`}
           >
             {tasks.length}
           </span>
@@ -57,15 +59,14 @@ const KanbanColumn = ({ column, tasks = [] }) => {
           title={`More options for ${column.title}`}
           className="
             flex h-8 w-8 shrink-0 items-center justify-center
-            rounded-lg text-slate-400
-            transition-colors
+            rounded-lg text-slate-400 transition-colors
             hover:bg-slate-200 hover:text-slate-700
             focus-visible:outline-none focus-visible:ring-2
             focus-visible:ring-violet-500
             dark:hover:bg-slate-800 dark:hover:text-slate-200
           "
         >
-          <FiMoreHorizontal size={18} />
+          <FiMoreHorizontal size={18} aria-hidden="true" />
         </button>
       </div>
 
@@ -73,7 +74,7 @@ const KanbanColumn = ({ column, tasks = [] }) => {
       <div
         ref={setNodeRef}
         className={`
-          flex min-h-80 flex-1 flex-col
+          flex min-h-80 min-w-0 flex-1 flex-col
           gap-3 rounded-xl border p-2.5
           transition-colors duration-200
           sm:min-h-100 sm:rounded-2xl sm:p-3
@@ -90,9 +91,11 @@ const KanbanColumn = ({ column, tasks = [] }) => {
         ) : (
           <div
             className={`
-              flex min-h-35 flex-1 items-center justify-center
+              flex min-h-36 flex-1 flex-col
+              items-center justify-center
               rounded-xl border border-dashed
-              transition-colors
+              px-3 py-6 text-center
+              transition-colors duration-200
               ${
                 isOver
                   ? "border-violet-400 bg-violet-100/60 dark:bg-violet-500/10"
@@ -100,15 +103,13 @@ const KanbanColumn = ({ column, tasks = [] }) => {
               }
             `}
           >
-            <div className="px-3 text-center">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {isOver ? "Release to move task" : "No tasks yet"}
-              </p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              {isOver ? "Release to move task" : "No tasks yet"}
+            </p>
 
-              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                Drag a task here
-              </p>
-            </div>
+            <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+              {isOver ? "Drop the task in this column" : "Drop a task here"}
+            </p>
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@ import {
   closestCorners,
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
@@ -14,37 +14,26 @@ import { updateTaskStatus } from "../../redux/slices/taskSlice";
 import KanbanColumn from "./KanbanColumn";
 
 const columns = [
-  {
-    id: "todo",
-    title: "Todo",
-  },
-  {
-    id: "in-progress",
-    title: "In Progress",
-  },
-  {
-    id: "review",
-    title: "Review",
-  },
-  {
-    id: "done",
-    title: "Done",
-  },
+  { id: "todo", title: "Todo" },
+  { id: "in-progress", title: "In Progress" },
+  { id: "review", title: "Review" },
+  { id: "done", title: "Done" },
 ];
 
 const KanbanBoard = ({ tasks = [] }) => {
   const dispatch = useDispatch();
   const [activeTask, setActiveTask] = useState(null);
 
+  // Separate mouse and touch sensors for reliable mobile dragging.
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 8,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 150,
+        delay: 180,
         tolerance: 8,
       },
     }),
@@ -54,11 +43,9 @@ const KanbanBoard = ({ tasks = [] }) => {
     tasks.filter((task) => task.status === status);
 
   const handleDragStart = ({ active }) => {
-    const task = tasks.find(
-      (item) => String(item.id) === String(active.id),
-    );
+    const task = tasks.find((item) => String(item.id) === String(active.id));
 
-    setActiveTask(task || null);
+    setActiveTask(task ?? null);
   };
 
   const handleDragCancel = () => {
@@ -84,21 +71,20 @@ const KanbanBoard = ({ tasks = [] }) => {
       (task) => String(task.id) === String(over.id),
     );
 
-    const newStatus = targetColumn?.id || targetTask?.status;
+    const newStatus = targetColumn?.id ?? targetTask?.status;
 
-    if (newStatus && newStatus !== draggedTask.status) {
-      dispatch(
-        updateTaskStatus({
-          taskId: draggedTask.id,
-          status: newStatus,
-        }),
-      );
-    }
+    if (!newStatus || newStatus === draggedTask.status) return;
+
+    dispatch(
+      updateTaskStatus({
+        taskId: draggedTask.id,
+        status: newStatus,
+      }),
+    );
   };
 
   return (
     <section className="w-full min-w-0">
-      {/* Board */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -106,10 +92,13 @@ const KanbanBoard = ({ tasks = [] }) => {
         onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
       >
+        {/* Horizontally scrollable Kanban columns */}
         <div
           className="
             flex w-full min-w-0
-            gap-3 overflow-x-auto overflow-y-hidden
+            items-start gap-3
+            overflow-x-auto overflow-y-hidden
+            overscroll-x-contain
             pb-4
             snap-x snap-proximity
             sm:gap-4 sm:pb-5
@@ -157,7 +146,15 @@ const KanbanBoard = ({ tasks = [] }) => {
                 {activeTask.assignee || "Unassigned"}
               </p>
 
-              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
+              <div
+                className="
+                  mt-3 inline-flex items-center
+                  rounded-full bg-violet-50
+                  px-2.5 py-1 text-xs font-medium
+                  text-violet-700
+                  dark:bg-violet-500/10 dark:text-violet-300
+                "
+              >
                 {columns.find((column) => column.id === activeTask.status)
                   ?.title || activeTask.status}
               </div>
