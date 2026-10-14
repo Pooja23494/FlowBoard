@@ -1,11 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  FiCalendar,
-  FiFlag,
-  FiGripVertical,
-  FiUser,
-} from "react-icons/fi";
+
+import { FiCalendar, FiFlag, FiMove, FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const priorityStyles = {
@@ -84,7 +80,7 @@ const DraggableTask = ({ task }) => {
             dark:hover:text-violet-400
           "
         >
-          <FiGripVertical size={18} aria-hidden="true" />
+          <FiMove size={18} aria-hidden="true" />
         </button>
 
         <button
